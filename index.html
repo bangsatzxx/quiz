@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kuis Seru</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f2f2f2; }
+    #question { font-size: 1.5rem; margin-bottom: 1rem; }
+    #timer { font-weight: bold; color: red; }
+    #result { margin-top: 1rem; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <div id="question"></div>
+  <input type="text" id="answer" placeholder="Jawaban lo..." autocomplete="off"/>
+  <button onclick="submitAnswer()">Jawab</button>
+  <div id="timer">15</div>
+  <div id="result"></div>
+
+  <script>
+    let questions = [], current = 0, timer = 15, interval;
+
+    fetch('/questions.json')
+      .then(res => res.json())
+      .then(data => {
+        questions = data;
+        showQuestion();
+      });
+
+    function showQuestion() {
+      document.getElementById("result").textContent = "";
+      document.getElementById("answer").value = "";
+      document.getElementById("question").textContent = questions[current].pertanyaan;
+      timer = 15;
+      document.getElementById("timer").textContent = timer;
+      interval = setInterval(() => {
+        timer--;
+        document.getElementById("timer").textContent = timer;
+        if (timer === 0) {
+          clearInterval(interval);
+          document.getElementById("result").textContent = "Waktu habis! Jawabannya: " + questions[current].jawaban;
+          setTimeout(nextQuestion, 2000);
+        }
+      }, 1000);
+    }
+
+    function submitAnswer() {
+      clearInterval(interval);
+      const jawaban = document.getElementById("answer").value.trim().toLowerCase();
+      const benar = jawaban === questions[current].jawaban.toLowerCase();
+      document.getElementById("result").textContent = benar ? "Bener!" : "Salah! Jawabannya: " + questions[current].jawaban;
+      setTimeout(nextQuestion, 2000);
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current >= questions.length) {
+        document.body.innerHTML = "<h2>Quiz selesai bre! Gokil!</h2>";
+      } else {
+        showQuestion();
+      }
+    }
+  </script>
+</body>
+</html>
